@@ -15,6 +15,7 @@ const HANTO = "한국투자신탁운용";
 export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }: Props) {
   const periodLabel = filter.period === "1Y" ? "1Y" : filter.period === "3Y" ? "3Y" : "2Y";
   const [vintage, setVintage] = useState<string>("전체");
+  const [topN, setTopN] = useState<number>(5);
 
   // sector 필터링
   let inSector = funds.filter((f) =>
@@ -82,19 +83,35 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
       }}>
         <div>
-          총 <b style={{ color: "#0070c0" }}>{filtered.length}</b>개 펀드 표시 중
+          총 <b style={{ color: "#0070c0" }}>{filtered.length}</b>개 펀드
           {grouping && <> · <b style={{ color: "#0070c0" }}>{groups.length}</b>개 소분류</>}
+          {sector !== "전체" && sector !== "TDF" && topN > 0 && (
+            <> · {grouping ? "그룹별" : "전체"} 상위 <b style={{ color: "#0070c0" }}>{topN}</b>개 표시</>
+          )}
         </div>
         {sector !== "전체" && sector !== "TDF" && (
-          <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", color: "#555" }}>
-            <input
-              type="checkbox"
-              checked={groupBySub}
-              onChange={(e) => setGroupBySub(e.target.checked)}
-              style={{ cursor: "pointer" }}
-            />
-            소분류 그룹핑 ({sector === "해외주식" ? "투자권역" : "제로인 소분류"})
-          </label>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, color: "#555" }}>
+              Top
+              <input
+                type="number"
+                min={0}
+                value={topN}
+                onChange={(e) => setTopN(Math.max(0, parseInt(e.target.value) || 0))}
+                title="그룹별(체크 시) / 전체(미체크 시) 상위 N개만 표시. 0 = 전체"
+                style={{ width: 44, padding: "1px 4px", fontSize: 11, border: "1px solid #ccc", borderRadius: 3 }}
+              />
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", color: "#555" }}>
+              <input
+                type="checkbox"
+                checked={groupBySub}
+                onChange={(e) => setGroupBySub(e.target.checked)}
+                style={{ cursor: "pointer" }}
+              />
+              소분류 그룹핑 ({sector === "해외주식" ? "투자권역" : "제로인 소분류"})
+            </label>
+          </div>
         )}
       </div>
       {filtered.length === 0 ? (
@@ -122,15 +139,19 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
             </thead>
             <tbody>
               {grouping
-                ? groups.flatMap((g) => [
-                    <tr key={`g-${g.cd}`} style={{ background: "#eef3f9", borderTop: "2px solid #c4d4e6", borderBottom: "1px solid #c4d4e6" }}>
-                      <td colSpan={12} style={{ padding: "6px 10px", fontSize: 12, fontWeight: 600, color: "#0d47a1" }}>
-                        {g.nm} <span style={{ color: "#888", fontWeight: 400, fontSize: 11 }}>({g.cd}, {g.funds.length}개)</span>
-                      </td>
-                    </tr>,
-                    ...g.funds.map((f, i) => renderRow(f, i, sector, vintage, filter)),
-                  ])
-                : filtered.map((f, i) => renderRow(f, i, sector, vintage, filter))}
+                ? groups.flatMap((g) => {
+                    const shown = topN > 0 ? g.funds.slice(0, topN) : g.funds;
+                    return [
+                      <tr key={`g-${g.cd}`} style={{ background: "#eef3f9", borderTop: "2px solid #c4d4e6", borderBottom: "1px solid #c4d4e6" }}>
+                        <td colSpan={12} style={{ padding: "6px 10px", fontSize: 12, fontWeight: 600, color: "#0d47a1" }}>
+                          {g.nm} <span style={{ color: "#888", fontWeight: 400, fontSize: 11 }}>({g.cd}, {shown.length}/{g.funds.length}개)</span>
+                        </td>
+                      </tr>,
+                      ...shown.map((f, i) => renderRow(f, i, sector, vintage, filter)),
+                    ];
+                  })
+                : ((sector !== "전체" && sector !== "TDF" && topN > 0) ? filtered.slice(0, topN) : filtered)
+                    .map((f, i) => renderRow(f, i, sector, vintage, filter))}
             </tbody>
           </table>
         </div>
