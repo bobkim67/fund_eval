@@ -6,6 +6,7 @@ import { WeightsSlider } from "./components/WeightsSlider";
 import { FilterPanel } from "./components/FilterPanel";
 import { SectorTable } from "./components/SectorTable";
 import { AMCSidebar } from "./components/AMCSidebar";
+import { exportFundsToExcel } from "./lib/excelExport";
 
 interface DateIndex {
   dates: { as_of: string; label: string }[];
@@ -20,6 +21,7 @@ export default function App() {
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS);
   const [filter, setFilter] = useState<FilterState>(DEFAULT_FILTER);
   const [activeSector, setActiveSector] = useState<string>("전체");
+  const [groupBySub, setGroupBySub] = useState<boolean>(true);
 
   // 사용 가능한 날짜 list 먼저 로드 (정적 JSON)
   useEffect(() => {
@@ -95,6 +97,17 @@ export default function App() {
         <div style={{ fontSize: 11, color: "#888" }}>
           {snapshot.source_file} · {snapshot.generated_at.slice(0, 19)} · {snapshot.funds.length} 펀드
         </div>
+        <button
+          onClick={() => exportFundsToExcel(scored, snapshot.sector_groups, filter.period, groupBySub, activeDate)}
+          title="현재 점수/필터 상태 + 소분류 그룹핑 토글에 따라 탭별 시트로 내려받기 (펀드코드 포함)"
+          style={{
+            marginLeft: "auto",
+            padding: "5px 12px", fontSize: 12, fontWeight: 600,
+            border: "1px solid #107c41", background: "#e8f5e9",
+            color: "#107c41", borderRadius: 4, cursor: "pointer",
+          }}>
+          📥 Excel 내려받기
+        </button>
       </header>
 
       {/* 상단: 가중치 + 상품필터 */}
@@ -141,7 +154,7 @@ export default function App() {
               );
             })}
           </div>
-          <SectorTable funds={scored} sector={activeSector} filter={filter} />
+          <SectorTable funds={scored} sector={activeSector} filter={filter} groupBySub={groupBySub} setGroupBySub={setGroupBySub} />
         </div>
 
         <AMCSidebar

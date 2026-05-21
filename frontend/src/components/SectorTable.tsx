@@ -6,14 +6,15 @@ interface Props {
   funds: ScoredFund[];
   sector: string;
   filter: FilterState;
+  groupBySub: boolean;
+  setGroupBySub: (v: boolean) => void;
 }
 
 const HANTO = "한국투자신탁운용";
 
-export function SectorTable({ funds, sector, filter }: Props) {
+export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }: Props) {
   const periodLabel = filter.period === "1Y" ? "1Y" : filter.period === "3Y" ? "3Y" : "2Y";
   const [vintage, setVintage] = useState<string>("전체");
-  const [groupBySub, setGroupBySub] = useState<boolean>(true);
 
   // sector 필터링
   let inSector = funds.filter((f) =>
