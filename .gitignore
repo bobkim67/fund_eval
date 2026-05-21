@@ -1,0 +1,47 @@
+# ─── Node ───
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/node_modules/
+frontend/tsconfig.tsbuildinfo
+
+# ─── Python ───
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# ─── 환경 / 민감정보 ───
+.env
+.env.local
+*.key
+*.pem
+
+# ─── 민감 스크립트 (DB credentials 포함, 로컬 전용) ───
+api/build_full_snapshot.py
+api/build_snapshots_by_date.py
+
+# ─── snapshot 원본 (운영은 frontend/public/snapshots/ 만 사용) ───
+api/snapshot.json
+api/snapshot_*.json
+api/snapshot_index.json
+
+# ─── FastAPI 부속 (운영 미사용) ───
+api/main.py
+api/__pycache__/
+_run_api.bat
+
+# ─── 데이터 / Excel ───
+*.xlsx
+*.xls
+*.csv
+*.parquet
+
+# ─── IDE / OS ───
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ─── 로그 ───
+*.log
