@@ -4,15 +4,13 @@ interface Props {
   weights: Weights;
   period: Period;
   onChange: (w: Weights) => void;
-  onHantoOptimal?: () => void;
-  onHantoSectorA?: () => void;
-  onHantoSectorB?: () => void;
+  onHantoPreset?: () => void;
   onReset?: () => void;
 }
 
 const PERIOD_LABEL: Record<Period, string> = { "1Y": "1년", "2Y": "2년", "3Y": "3년" };
 
-export function WeightsSlider({ weights, period, onChange, onHantoOptimal, onHantoSectorA, onHantoSectorB, onReset }: Props) {
+export function WeightsSlider({ weights, period, onChange, onHantoPreset, onReset }: Props) {
   const pLabel = PERIOD_LABEL[period];
   const LABELS: { key: keyof Weights; label: string; color: string }[] = [
     { key: "aum", label: "패밀리 AUM", color: "#0070c0" },
@@ -76,28 +74,12 @@ export function WeightsSlider({ weights, period, onChange, onHantoOptimal, onHan
         <button style={btnPreset} onClick={preset({ aum: 0.40, yield_2y: 0.20, sharp_2y: 0.20, amc_sector_y: 0.20 })}>AUM 강조</button>
         <button style={btnPreset} onClick={preset({ aum: 0.20, yield_2y: 0.30, sharp_2y: 0.30, amc_sector_y: 0.20 })}>수익 강조</button>
         <button style={btnPreset} onClick={preset({ aum: 0.20, yield_2y: 0.20, sharp_2y: 0.20, amc_sector_y: 0.40 })}>운용사 강조</button>
-        {onHantoOptimal && (
+        {onHantoPreset && (
           <button
-            onClick={onHantoOptimal}
-            title="전체 평균 최우호 (3Y / sharp≥1.5 / family≥500억 / 운용사 70%)"
+            onClick={onHantoPreset}
+            title="3Y / sharp≥1.5 / family≥500억 / 가중치 10·25·25·40"
             style={btnHanto}>
-            한투★ 전체
-          </button>
-        )}
-        {onHantoSectorA && (
-          <button
-            onClick={onHantoSectorA}
-            title="V1: sector 깊이 (3Y / sharp≥1.0 / family≥500억 / 30/10/10/50) — 3 sector 한투 1위"
-            style={btnHanto}>
-            한투★ V1
-          </button>
-        )}
-        {onHantoSectorB && (
-          <button
-            onClick={onHantoSectorB}
-            title="V2: sector 너비 (2Y / sharp≥0.7 / family≥500억 / 30/10/10/50) — 4 sector 한투 진입"
-            style={btnHanto}>
-            한투★ V2
+            한투★
           </button>
         )}
         {onReset && (

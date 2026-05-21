@@ -105,20 +105,10 @@ export default function App() {
           weights={weights}
           period={filter.period}
           onChange={setWeights}
-          onHantoOptimal={() => {
-            // 한투 전체 평균 최우호 (3Y / sharp≥1.5 / family≥500억 / 운용사 70%)
-            setWeights({ aum: 0.10, yield_2y: 0.10, sharp_2y: 0.10, amc_sector_y: 0.70 });
+          onHantoPreset={() => {
+            // 한투★ (3Y / sharp≥1.5 / family≥500억 / 10·25·25·40)
+            setWeights({ aum: 0.10, yield_2y: 0.25, sharp_2y: 0.25, amc_sector_y: 0.40 });
             setFilter({ period: "3Y", sharp_min: 1.5, fam_aek_min_oku: 500, lineup: "all" });
-          }}
-          onHantoSectorA={() => {
-            // V1: sector 깊이 (3Y / sharp≥1.0 / family≥500억 / 30/10/10/50)
-            setWeights({ aum: 0.30, yield_2y: 0.10, sharp_2y: 0.10, amc_sector_y: 0.50 });
-            setFilter({ period: "3Y", sharp_min: 1.0, fam_aek_min_oku: 500, lineup: "all" });
-          }}
-          onHantoSectorB={() => {
-            // V2: sector 너비 (2Y / sharp≥0.7 / family≥500억 / 30/10/10/50)
-            setWeights({ aum: 0.30, yield_2y: 0.10, sharp_2y: 0.10, amc_sector_y: 0.50 });
-            setFilter({ period: "2Y", sharp_min: 0.7, fam_aek_min_oku: 500, lineup: "all" });
           }}
           onReset={() => {
             setWeights(DEFAULT_WEIGHTS);
