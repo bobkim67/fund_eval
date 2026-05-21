@@ -103,6 +103,7 @@ export default function App() {
       <div style={{ flexShrink: 0, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         <WeightsSlider
           weights={weights}
+          period={filter.period}
           onChange={setWeights}
           onHantoOptimal={() => {
             // 한투 전체 평균 최우호 (3Y / sharp≥1.5 / family≥500억 / 운용사 70%)
