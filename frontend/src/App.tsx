@@ -98,10 +98,23 @@ export default function App() {
           {snapshot.source_file} · {snapshot.generated_at.slice(0, 19)} · {snapshot.funds.length} 펀드
         </div>
         <button
+          onClick={() => {
+            setWeights(DEFAULT_WEIGHTS);
+            setFilter(DEFAULT_FILTER);
+          }}
+          title="기본 설정으로 초기화 (한투★: 2Y / sharp≥1.3 / family≥300억 / 10·40·20·30)"
+          style={{
+            marginLeft: "auto",
+            padding: "5px 12px", fontSize: 12,
+            border: "1px solid #999", background: "#fff",
+            color: "#555", borderRadius: 4, cursor: "pointer",
+          }}>
+          ↻ 초기화
+        </button>
+        <button
           onClick={() => exportFundsToExcel(scored, snapshot.sector_groups, filter.period, groupBySub, activeDate)}
           title="현재 점수/필터 상태 + 소분류 그룹핑 토글에 따라 탭별 시트로 내려받기 (펀드코드 포함)"
           style={{
-            marginLeft: "auto",
             padding: "5px 12px", fontSize: 12, fontWeight: 600,
             border: "1px solid #107c41", background: "#e8f5e9",
             color: "#107c41", borderRadius: 4, cursor: "pointer",
@@ -116,10 +129,6 @@ export default function App() {
           weights={weights}
           period={filter.period}
           onChange={setWeights}
-          onReset={() => {
-            setWeights(DEFAULT_WEIGHTS);
-            setFilter(DEFAULT_FILTER);
-          }}
         />
         <FilterPanel filter={filter} onChange={setFilter} totalCount={snapshot.funds.length} passedCount={filteredFunds.length} />
       </div>

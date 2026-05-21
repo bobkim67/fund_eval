@@ -2,6 +2,8 @@ import type { ScoredFund, Period } from "../types";
 import { getSharp, getYield } from "./scoring";
 
 const HANTO = "한국투자신탁운용";
+const BODY_SIZE = 10;
+const NUM_FMT = "#,##0.0";
 
 interface ExcelJSModule {
   Workbook: new () => ExcelJSWorkbook;
@@ -13,19 +15,47 @@ interface ExcelJSWorkbook {
 interface ExcelJSWorksheet {
   addRow: (row: (string | number | null)[]) => ExcelJSRow;
   getRow: (idx: number) => ExcelJSRow;
+  getColumn: (idx: number) => ExcelJSColumn;
   columns: ExcelJSColumn[];
   views: { state: string; ySplit?: number }[];
+  eachRow: (
+    opts: { includeEmpty?: boolean },
+    cb: (row: ExcelJSRow, rowNum: number) => void,
+  ) => void;
 }
 interface ExcelJSRow {
   font: object;
   fill?: object;
-  getCell: (idx: number) => { font: object; fill?: object; numFmt?: string };
   height?: number;
+  getCell: (idx: number) => ExcelJSCell;
+  eachCell: (
+    opts: { includeEmpty?: boolean },
+    cb: (cell: ExcelJSCell, colNum: number) => void,
+  ) => void;
 }
-interface ExcelJSColumn { width: number }
+interface ExcelJSCell {
+  value: unknown;
+  font: object;
+  fill?: object;
+  numFmt?: string;
+}
+interface ExcelJSColumn {
+  width?: number;
+  numFmt?: string;
+}
 
 function fmtNum(v: number | null | undefined): number | null {
   return v === null || v === undefined || isNaN(v) ? null : v;
+}
+
+function visualWidth(s: string): number {
+  let w = 0;
+  for (const ch of s) {
+    const code = ch.charCodeAt(0);
+    // 한글/한자/일본어 등 CJK 영역은 1.8 너비로 가산
+    w += (code >= 0x3000 && code <= 0xD7FF) ? 1.8 : 1;
+  }
+  return w;
 }
 
 function buildRow(f: ScoredFund, rank: number, sector: string, period: Period): (string | number | null)[] {
@@ -68,6 +98,12 @@ function buildHeader(sector: string, period: Period): string[] {
   return h;
 }
 
+function rowFont(f: ScoredFund) {
+  if (f.amc_nm === HANTO) return { size: BODY_SIZE, color: { argb: "FF0D47A1" }, bold: true };
+  if (f.in_kis_lineup !== "Y") return { size: BODY_SIZE, color: { argb: "FFC62828" }, bold: true };
+  return { size: BODY_SIZE };
+}
+
 export async function exportFundsToExcel(
   scored: ScoredFund[],
   sectorGroups: string[],
@@ -79,6 +115,15 @@ export async function exportFundsToExcel(
   const wb = new ExcelJS.Workbook();
 
   const tabs = ["전체", ...sectorGroups, "TDF"];
+
+  // 헤더 명칭별 numFmt 적용 대상 (모든 숫자 → 소수 한자리)
+  const p = period === "1Y" ? "1Y" : period === "3Y" ? "3Y" : "2Y";
+  const numericHeaders = new Set<string>([
+    "순위",
+    "클래스AUM(억)", "패밀리AUM(억)",
+    `${p}%`, `샤프(${p})`,
+    "AUM점수", "수익점수", "샤프점수", "운용사점수", "총점",
+  ]);
 
   for (const sec of tabs) {
     // sector 필터링
@@ -98,17 +143,10 @@ export async function exportFundsToExcel(
     hRow.font = { bold: true };
     hRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0F0F5" } };
 
-    // 컬럼 너비
-    const widths = sec === "전체" || sec === "TDF"
-      ? [6, 10, 18, 8, 10, 38, 12, 12, 10, 10, 10, 10, 10, 10, 10]
-      : [6, 18, 8, 10, 38, 12, 12, 10, 10, 10, 10, 10, 10, 10];
-    widths.forEach((w, i) => { if (ws.columns[i]) ws.columns[i].width = w; });
-
     // 그룹핑 적용 여부 (전체/TDF 탭 제외, 토글 ON)
     const grouping = groupBySub && sec !== "전체" && sec !== "TDF";
 
     if (grouping) {
-      // subclass_cd 별 그룹화, 코드 오름차순, 그룹 내 total_score desc, 그룹별 1,2,3 재시작
       const groupMap = new Map<string, ScoredFund[]>();
       secFunds.forEach((f) => {
         const cd = f.subclass_cd || "ZZ_MISC";
@@ -120,33 +158,46 @@ export async function exportFundsToExcel(
       for (const [cd, items] of sortedGroups) {
         items.sort((a, b) => (b.total_score ?? 0) - (a.total_score ?? 0));
         const nm = items[0]?.subclass_nm || "미분류";
-        // 그룹 헤더 행 (병합 없이 첫 셀에만 텍스트)
         const gRow = ws.addRow([`▶ ${nm} (${cd}, ${items.length}개)`]);
-        gRow.font = { bold: true };
-        const gCell = gRow.getCell(1);
-        gCell.font = { bold: true, color: { argb: "FF0D47A1" } } as object;
-        gCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEEF3F9" } };
+        gRow.font = { size: BODY_SIZE, bold: true, color: { argb: "FF0D47A1" } } as object;
+        gRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEEF3F9" } };
         items.forEach((f, i) => {
           const r = ws.addRow(buildRow(f, i + 1, sec, period));
-          if (f.amc_nm === HANTO) {
-            r.font = { color: { argb: "FF0D47A1" }, bold: true } as object;
-          } else if (f.in_kis_lineup !== "Y") {
-            r.font = { color: { argb: "FFC62828" }, bold: true } as object;
-          }
+          r.font = rowFont(f) as object;
         });
       }
     } else {
       secFunds.forEach((f, i) => {
         const r = ws.addRow(buildRow(f, i + 1, sec, period));
-        if (f.amc_nm === HANTO) {
-          r.font = { color: { argb: "FF0D47A1" }, bold: true } as object;
-        } else if (f.in_kis_lineup !== "Y") {
-          r.font = { color: { argb: "FFC62828" }, bold: true } as object;
-        }
+        r.font = rowFont(f) as object;
       });
     }
 
-    // 헤더 freeze
+    // 숫자 컬럼 numFmt
+    header.forEach((h, idx) => {
+      if (numericHeaders.has(h)) {
+        ws.getColumn(idx + 1).numFmt = NUM_FMT;
+      }
+    });
+
+    // 컬럼 너비 자동 맞춤 (콘텐츠 visual width 기반)
+    const colMax: number[] = header.map((h) => visualWidth(h));
+    ws.eachRow({ includeEmpty: false }, (row, rowNum) => {
+      if (rowNum === 1) return; // header 이미 반영
+      row.eachCell({ includeEmpty: false }, (cell, colNum) => {
+        const v = cell.value;
+        const s = v === null || v === undefined ? ""
+          : typeof v === "number" ? v.toFixed(1)
+          : String(v);
+        const w = visualWidth(s);
+        const i = colNum - 1;
+        if (i < colMax.length && w > colMax[i]) colMax[i] = w;
+      });
+    });
+    colMax.forEach((w, i) => {
+      ws.getColumn(i + 1).width = Math.max(6, Math.min(50, w + 2));
+    });
+
     ws.views = [{ state: "frozen", ySplit: 1 }];
   }
 
