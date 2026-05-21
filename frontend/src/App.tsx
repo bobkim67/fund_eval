@@ -59,12 +59,10 @@ export default function App() {
     [filteredFunds]
   );
 
-  // 전체/TDF 모드 = overall 점수, 그 외 = sector 점수
-  const amcScoreMode = (activeSector === "전체" || activeSector === "TDF") ? "overall" : "sector";
-
+  // 운용사 점수는 항상 전체 기준 (sector 별 분리 안 함)
   const scored: ScoredFund[] = useMemo(() => {
-    return scoreFunds(filteredFunds, weights, amcMaps, amcScoreMode, filter.period);
-  }, [filteredFunds, weights, amcMaps, amcScoreMode, filter.period]);
+    return scoreFunds(filteredFunds, weights, amcMaps, "overall", filter.period);
+  }, [filteredFunds, weights, amcMaps, filter.period]);
 
   if (error) return (
     <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
@@ -149,9 +147,7 @@ export default function App() {
         <AMCSidebar
           funds={scored}
           sector={activeSector}
-          bySectorAmc={amcMaps.bySectorAmc}
           byAmcOverall={amcMaps.byAmcOverall}
-          aumBySectorAmc={amcMaps.aumBySectorAmc}
           aumByAmcOverall={amcMaps.aumByAmcOverall}
         />
       </div>

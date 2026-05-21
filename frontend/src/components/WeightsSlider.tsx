@@ -70,7 +70,7 @@ export function WeightsSlider({ weights, period, onChange, onReset }: Props) {
         <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
           <button
             onClick={onReset}
-            title="기본 설정으로 초기화 (한투★: 3Y / sharp≥1.5 / family≥500억 / 10·25·25·40)"
+            title="기본 설정으로 초기화 (한투★: 3Y / sharp≥1.5 / family≥400억 / 10·25·25·40)"
             style={btnReset}>
             ↻ 초기화
           </button>

@@ -75,11 +75,11 @@ export interface FilterState {
   lineup: "all" | "kis" | "kis_kim";             // 전체 / KIS 라인업 / KIS + 한투(KIM)
 }
 
-// 기본 = 한투★ 셋팅 (3Y / sharp≥1.5 / family≥500억 / 라인업 전체)
+// 기본 = 한투★ 셋팅 (3Y / sharp≥1.5 / family≥400억 / 라인업 전체)
 export const DEFAULT_FILTER: FilterState = {
   period: "3Y",
   sharp_min: 1.5,
-  fam_aek_min_oku: 500,
+  fam_aek_min_oku: 400,
   lineup: "all",
 };
 

@@ -4,42 +4,33 @@ import { formatAUM, formatNum } from "../lib/scoring";
 interface Props {
   funds: ScoredFund[];          // 필터 통과 펀드들
   sector: string;                // "전체" 또는 sector 명
-  bySectorAmc: Map<string, number>;
   byAmcOverall: Map<string, number>;
-  aumBySectorAmc: Map<string, number>;
   aumByAmcOverall: Map<string, number>;
 }
 
 const HANTO = "한국투자신탁운용";
 
-export function AMCSidebar({ funds, sector, bySectorAmc, byAmcOverall, aumBySectorAmc, aumByAmcOverall }: Props) {
-  const isOverall = sector === "전체" || sector === "TDF";
-
-  // 현재 sector/TDF + 표시 펀드 안의 unique amc 추출
+export function AMCSidebar({ funds, sector, byAmcOverall, aumByAmcOverall }: Props) {
+  // 현재 sector/TDF + 표시 펀드 안의 unique amc 추출 (sector 필터만 적용, 점수/AUM은 항상 overall)
   const amcSet = new Set<string>();
   const cntMap = new Map<string, number>();
   funds.forEach((f) => {
     if (!f.amc_nm) return;
-    if (sector === "전체") {
-      // 모든 펀드
-    } else if (sector === "TDF") {
+    if (sector === "TDF") {
       if (!f.is_tdf) return;
-    } else {
+    } else if (sector !== "전체") {
       if (f.sector_group !== sector) return;
     }
     amcSet.add(f.amc_nm);
     cntMap.set(f.amc_nm, (cntMap.get(f.amc_nm) ?? 0) + 1);
   });
 
-  const amcRanking = Array.from(amcSet).map((amc) => {
-    const score = isOverall
-      ? (byAmcOverall.get(amc) ?? 0)
-      : (bySectorAmc.get(`${sector}|${amc}`) ?? 0);
-    const aum = isOverall
-      ? (aumByAmcOverall.get(amc) ?? 0)
-      : (aumBySectorAmc.get(`${sector}|${amc}`) ?? 0);
-    return { nm: amc, score, aum, count: cntMap.get(amc) ?? 0 };
-  }).sort((a, b) => b.score - a.score);
+  const amcRanking = Array.from(amcSet).map((amc) => ({
+    nm: amc,
+    score: byAmcOverall.get(amc) ?? 0,
+    aum: aumByAmcOverall.get(amc) ?? 0,
+    count: cntMap.get(amc) ?? 0,
+  })).sort((a, b) => b.score - a.score);
 
   return (
     <div style={{
@@ -49,9 +40,7 @@ export function AMCSidebar({ funds, sector, bySectorAmc, byAmcOverall, aumBySect
       <div style={{ marginBottom: 10 }}>
         <strong style={{ fontSize: 15 }}>운용사 점수</strong>
         <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>
-          {sector === "전체" ? "전체 통합 ranking" :
-           sector === "TDF" ? "TDF 통합 ranking" :
-           `${sector} sector 안 ranking`}
+          전체 통합 ranking{sector !== "전체" && sector !== "TDF" ? ` (${sector} 보유 운용사)` : sector === "TDF" ? " (TDF 보유 운용사)" : ""}
         </div>
         <div style={{ fontSize: 11, color: "#888" }}>
           필터 통과 펀드들의 운용사별 family AEK 합 기준
