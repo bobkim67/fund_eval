@@ -105,11 +105,6 @@ export default function App() {
           weights={weights}
           period={filter.period}
           onChange={setWeights}
-          onHantoPreset={() => {
-            // 한투★ (3Y / sharp≥1.5 / family≥500억 / 10·25·25·40)
-            setWeights({ aum: 0.10, yield_2y: 0.25, sharp_2y: 0.25, amc_sector_y: 0.40 });
-            setFilter({ period: "3Y", sharp_min: 1.5, fam_aek_min_oku: 500, lineup: "all" });
-          }}
           onReset={() => {
             setWeights(DEFAULT_WEIGHTS);
             setFilter(DEFAULT_FILTER);

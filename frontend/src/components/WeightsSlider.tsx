@@ -4,13 +4,12 @@ interface Props {
   weights: Weights;
   period: Period;
   onChange: (w: Weights) => void;
-  onHantoPreset?: () => void;
   onReset?: () => void;
 }
 
 const PERIOD_LABEL: Record<Period, string> = { "1Y": "1년", "2Y": "2년", "3Y": "3년" };
 
-export function WeightsSlider({ weights, period, onChange, onHantoPreset, onReset }: Props) {
+export function WeightsSlider({ weights, period, onChange, onReset }: Props) {
   const pLabel = PERIOD_LABEL[period];
   const LABELS: { key: keyof Weights; label: string; color: string }[] = [
     { key: "aum", label: "패밀리 AUM", color: "#0070c0" },
@@ -35,8 +34,6 @@ export function WeightsSlider({ weights, period, onChange, onHantoPreset, onRese
       amc_sector_y: weights.amc_sector_y / t,
     });
   };
-
-  const preset = (preset: Weights) => () => onChange(preset);
 
   return (
     <div style={{ background: "#fff", padding: 12, borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
@@ -69,28 +66,16 @@ export function WeightsSlider({ weights, period, onChange, onHantoPreset, onRese
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
-        <button style={btnPreset} onClick={preset({ aum: 0.25, yield_2y: 0.25, sharp_2y: 0.25, amc_sector_y: 0.25 })}>균등</button>
-        <button style={btnPreset} onClick={preset({ aum: 0.40, yield_2y: 0.20, sharp_2y: 0.20, amc_sector_y: 0.20 })}>AUM 강조</button>
-        <button style={btnPreset} onClick={preset({ aum: 0.20, yield_2y: 0.30, sharp_2y: 0.30, amc_sector_y: 0.20 })}>수익 강조</button>
-        <button style={btnPreset} onClick={preset({ aum: 0.20, yield_2y: 0.20, sharp_2y: 0.20, amc_sector_y: 0.40 })}>운용사 강조</button>
-        {onHantoPreset && (
-          <button
-            onClick={onHantoPreset}
-            title="3Y / sharp≥1.5 / family≥500억 / 가중치 10·25·25·40"
-            style={btnHanto}>
-            한투★
-          </button>
-        )}
-        {onReset && (
+      {onReset && (
+        <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
           <button
             onClick={onReset}
-            title="기본 설정으로 초기화 (2Y / sharp≥1.0 / family≥400억 / 균등 가중)"
+            title="기본 설정으로 초기화 (한투★: 3Y / sharp≥1.5 / family≥500억 / 10·25·25·40)"
             style={btnReset}>
             ↻ 초기화
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -98,15 +83,6 @@ export function WeightsSlider({ weights, period, onChange, onHantoPreset, onRese
 const btn: React.CSSProperties = {
   padding: "4px 10px", fontSize: 12, border: "1px solid #c62828", background: "#fff",
   color: "#c62828", borderRadius: 4, cursor: "pointer",
-};
-const btnPreset: React.CSSProperties = {
-  padding: "4px 8px", fontSize: 12, border: "1px solid #ddd", background: "#fafafa",
-  color: "#444", borderRadius: 4, cursor: "pointer",
-};
-const btnHanto: React.CSSProperties = {
-  padding: "4px 8px", fontSize: 12,
-  border: "1px solid #0070c0", background: "#e3f2fd",
-  color: "#0070c0", borderRadius: 4, cursor: "pointer", fontWeight: 600,
 };
 const btnReset: React.CSSProperties = {
   padding: "4px 8px", fontSize: 12,
