@@ -3,53 +3,53 @@ setlocal EnableDelayedExpansion
 
 cd /d "%~dp0"
 
-REM â”€â”€â”€ snapshot ê°±ì‹  prompt â”€â”€â”€
+REM ¦¡¦¡¦¡ snapshot °»½Å prompt ¦¡¦¡¦¡
 echo.
 echo ============================================================
-echo  snapshot ê°±ì‹ 
+echo  snapshot °»½Å
 echo ============================================================
-echo  n        : skip (í˜„ì¬ snapshot ê·¸ëŒ€ë¡œ ì‚¬ìš©)
-echo  l        : ìµœì‹  (ì–´ì œê¹Œì§€) fetch
-echo  YYYYMMDD : íŠ¹ì • ë‚ ì§œ fetch (ì˜ˆ: 20260430)
-echo            ì—¬ëŸ¬ ë‚ ì§œëŠ” ê³µë°±ìœ¼ë¡œ êµ¬ë¶„ (ì˜ˆ: 20260131 20260228)
+echo  n        : skip (ÇöÀç snapshot ±×´ë·Î »ç¿ë)
+echo  l        : ÃÖ½Å (¾îÁ¦±îÁö) fetch
+echo  YYYYMMDD : Æ¯Á¤ ³¯Â¥ fetch (¿¹: 20260430)
+echo            ¿©·¯ ³¯Â¥´Â °ø¹éÀ¸·Î ±¸ºĞ (¿¹: 20260131 20260228)
 echo ============================================================
-set /p choice="ì„ íƒ: "
+set /p choice="¼±ÅÃ: "
 
 if /i "%choice%"=="n" goto :skip_snap
 if /i "%choice%"=="" goto :skip_snap
 
 if /i "%choice%"=="l" (
   echo.
-  echo [ìµœì‹  snapshot fetch]
+  echo [ÃÖ½Å snapshot fetch]
   "C:\Users\user\Downloads\python\.venv\Scripts\python.exe" api\build_full_snapshot.py
   goto :skip_snap
 )
 
-REM ê·¸ ì™¸ = ë‚ ì§œë¡œ ê°„ì£¼
+REM ±× ¿Ü = ³¯Â¥·Î °£ÁÖ
 echo.
-echo [ë‚ ì§œ snapshot fetch: %choice%]
+echo [³¯Â¥ snapshot fetch: %choice%]
 "C:\Users\user\Downloads\python\.venv\Scripts\python.exe" api\build_snapshots_by_date.py %choice%
 
 :skip_snap
 
-REM â”€â”€â”€ frontend/public/snapshots/ ë™ê¸°í™” (Cloudflare ì •ì  í˜¸ìŠ¤íŒ…ìš©) â”€â”€â”€
+REM ¦¡¦¡¦¡ frontend/public/snapshots/ µ¿±âÈ­ (Cloudflare Á¤Àû È£½ºÆÃ¿ë) ¦¡¦¡¦¡
 echo.
-echo [snapshot -> frontend/public ë™ê¸°í™”]
+echo [snapshot -> frontend/public µ¿±âÈ­]
 "C:\Users\user\Downloads\python\.venv\Scripts\python.exe" frontend\scripts\sync_snapshots.py
 
-REM â”€â”€â”€ FastAPI ë°±ê·¸ë¼ìš´ë“œ ì‹¤í–‰ â”€â”€â”€
+REM ¦¡¦¡¦¡ FastAPI ¹é±×¶ó¿îµå ½ÇÇà ¦¡¦¡¦¡
 start "PensionEval-API" cmd /k "_run_api.bat"
 
-REM â”€â”€â”€ Vite dev â”€â”€â”€
+REM ¦¡¦¡¦¡ Vite dev ¦¡¦¡¦¡
 start "PensionEval-Frontend" cmd /k "_run_frontend.bat"
 
-REM â”€â”€â”€ ë¸Œë¼ìš°ì € ì—´ê¸° â”€â”€â”€
+REM ¦¡¦¡¦¡ ºê¶ó¿ìÀú ¿­±â ¦¡¦¡¦¡
 timeout /t 6 /nobreak >nul
 start "" "http://localhost:5174/"
 
 echo.
-echo ë‘ cmd ì°½ (PensionEval-API, PensionEval-Frontend) ì—´ë ¸ìŠµë‹ˆë‹¤.
-echo ë¸Œë¼ìš°ì €: http://localhost:5174/
-echo ì¢…ë£Œ: ë‘ ì°½ ëª¨ë‘ ë‹«ê¸°
+echo µÎ cmd Ã¢ (PensionEval-API, PensionEval-Frontend) ¿­·È½À´Ï´Ù.
+echo ºê¶ó¿ìÀú: http://localhost:5174/
+echo Á¾·á: µÎ Ã¢ ¸ğµÎ ´İ±â
 echo.
 pause

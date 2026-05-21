@@ -4,6 +4,8 @@ export interface Fund {
   fund_nm: string | null;
   kis_type: string | null;
   sector_group: string;
+  subclass_cd: string | null;
+  subclass_nm: string | null;
   in_kis_lineup: string | null;
   class_gb: string | null;
   tmnt_gb: string | null;

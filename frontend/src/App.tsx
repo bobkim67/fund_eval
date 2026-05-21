@@ -140,7 +140,6 @@ export default function App() {
                 sg === "TDF" ? f.is_tdf :
                 f.sector_group === sg;
               const cnt = scored.filter((f) => matchSec(f) && f.total_score !== null).length;
-              const hantoInSec = scored.filter((f) => matchSec(f) && f.amc_nm === "한국투자신탁운용" && f.total_score !== null).length;
               const isActive = activeSector === sg;
               if (sg !== "전체" && cnt === 0) return null;
               return (
@@ -153,7 +152,7 @@ export default function App() {
                     fontSize: 13, fontWeight: isActive ? 600 : 400,
                     cursor: "pointer", whiteSpace: "nowrap",
                   }}>
-                  {sg} <span style={{ color: "#888", fontSize: 11 }}>{cnt}{hantoInSec ? `·한투${hantoInSec}` : ""}</span>
+                  {sg} <span style={{ color: "#888", fontSize: 11 }}>{cnt}</span>
                 </button>
               );
             })}
