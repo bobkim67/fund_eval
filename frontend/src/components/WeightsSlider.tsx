@@ -11,12 +11,11 @@ const PERIOD_LABEL: Record<Period, string> = { "1Y": "1년", "2Y": "2년", "3Y":
 export function WeightsSlider({ weights, period, onChange }: Props) {
   const pLabel = PERIOD_LABEL[period];
   const LABELS: { key: keyof Weights; label: string; color: string }[] = [
-    { key: "aum", label: "패밀리 AUM", color: "#0070c0" },
     { key: "yield_2y", label: `${pLabel} 수익률`, color: "#107c41" },
     { key: "sharp_2y", label: `${pLabel} 샤프`, color: "#bf6f00" },
     { key: "amc_sector_y", label: "운용사 점수", color: "#7c4dff" },
   ];
-  const total = weights.aum + weights.yield_2y + weights.sharp_2y + weights.amc_sector_y;
+  const total = weights.yield_2y + weights.sharp_2y + weights.amc_sector_y;
   const totalPct = (total * 100).toFixed(0);
   const isValid = Math.abs(total - 1.0) < 0.01;
 
@@ -27,7 +26,6 @@ export function WeightsSlider({ weights, period, onChange }: Props) {
   const normalize = () => {
     const t = total || 1;
     onChange({
-      aum: weights.aum / t,
       yield_2y: weights.yield_2y / t,
       sharp_2y: weights.sharp_2y / t,
       amc_sector_y: weights.amc_sector_y / t,

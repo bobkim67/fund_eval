@@ -52,7 +52,7 @@ export function FilterPanel({ filter, onChange, totalCount, passedCount }: Props
 
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 2 }}>
-            <span>패밀리 AUM ≥</span>
+            <span>패밀리 NAV ≥</span>
             <b>{filter.fam_aek_min_oku.toLocaleString()}억</b>
           </div>
           <input type="range" min={0} max={1000} step={10} value={filter.fam_aek_min_oku}

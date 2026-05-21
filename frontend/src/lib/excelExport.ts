@@ -61,8 +61,8 @@ function visualWidth(s: string): number {
 function buildRow(f: ScoredFund, rank: number, sector: string, period: Period): (string | number | null)[] {
   const yld = getYield(f, period);
   const shp = getSharp(f, period);
-  const aum_oku = f.aum ? f.aum / 1e8 : null;
-  const fam_oku = f.fam_aek ? f.fam_aek / 1e8 : null;
+  const nav_oku = f.nav ? f.nav / 1e8 : null;
+  const fam_oku = f.fam_nav ? f.fam_nav / 1e8 : null;
   const row: (string | number | null)[] = [rank];
   if (sector === "전체") row.push(f.sector_group);
   if (sector === "TDF") row.push(f.tdf_vintage || "-");
@@ -71,11 +71,10 @@ function buildRow(f: ScoredFund, rank: number, sector: string, period: Period): 
     f.in_kis_lineup === "Y" ? "KIS" : "-",
     f.fund_cd,                          // 펀드코드 (Excel 전용 컬럼)
     f.fund_nm || "",
-    fmtNum(aum_oku),
+    fmtNum(nav_oku),
     fmtNum(fam_oku),
     fmtNum(yld),
     fmtNum(shp),
-    fmtNum(f.score_aum),
     fmtNum(f.score_yield_2y),
     fmtNum(f.score_sharp_2y),
     fmtNum(f.score_amc_sector_y),
@@ -91,9 +90,9 @@ function buildHeader(sector: string, period: Period): string[] {
   if (sector === "TDF") h.push("빈티지");
   h.push(
     "운용사", "라인업", "펀드코드", "펀드명",
-    "클래스AUM(억)", "패밀리AUM(억)",
+    "클래스NAV(억)", "패밀리NAV(억)",
     `${p}%`, `샤프(${p})`,
-    "AUM점수", "수익점수", "샤프점수", "운용사점수", "총점",
+    "수익점수", "샤프점수", "운용사점수", "총점",
   );
   return h;
 }
@@ -120,9 +119,9 @@ export async function exportFundsToExcel(
   const p = period === "1Y" ? "1Y" : period === "3Y" ? "3Y" : "2Y";
   const numericHeaders = new Set<string>([
     "순위",
-    "클래스AUM(억)", "패밀리AUM(억)",
+    "클래스NAV(억)", "패밀리NAV(억)",
     `${p}%`, `샤프(${p})`,
-    "AUM점수", "수익점수", "샤프점수", "운용사점수", "총점",
+    "수익점수", "샤프점수", "운용사점수", "총점",
   ]);
 
   for (const sec of tabs) {

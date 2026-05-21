@@ -16,6 +16,7 @@ export interface Fund {
   aum: number | null;
   nav: number | null;
   fam_aek: number | null;
+  fam_nav: number | null;
   fam_size: number | null;
   yield_2y: number | null;
   yield_3y: number | null;
@@ -61,7 +62,6 @@ export interface Snapshot {
 }
 
 export interface Weights {
-  aum: number;
   yield_2y: number;
   sharp_2y: number;
   amc_sector_y: number;
@@ -71,11 +71,11 @@ export interface Weights {
 export interface FilterState {
   period: Period;                                // 평가 기간 (1Y/2Y/3Y)
   sharp_min: number;                             // 해당 period SHARP >= x
-  fam_aek_min_oku: number;                       // family AEK >= x억
+  fam_aek_min_oku: number;                       // family NAV >= x억 (변수명은 구버전 유지, 의미는 NAV)
   lineup: "all" | "kis" | "kis_kim";             // 전체 / KIS 라인업 / KIS + 한투(KIM)
 }
 
-// 기본 = 한투★ 셋팅 (2Y / sharp≥1.3 / family≥300억 / 라인업 전체)
+// 기본 = 한투★ 셋팅 (2Y / sharp≥1.3 / family NAV≥300억 / 라인업 전체)
 export const DEFAULT_FILTER: FilterState = {
   period: "2Y",
   sharp_min: 1.3,
@@ -83,13 +83,12 @@ export const DEFAULT_FILTER: FilterState = {
   lineup: "all",
 };
 
-// 기본 가중치 = 한투★ (AUM 10 / 수익 40 / 샤프 20 / 운용사 30)
-export const DEFAULT_WEIGHTS = {
-  aum: 0.10, yield_2y: 0.40, sharp_2y: 0.20, amc_sector_y: 0.30,
+// 기본 가중치 = 한투★ (수익 45 / 샤프 25 / 운용사 30) — NAV 슬롯 제거
+export const DEFAULT_WEIGHTS: Weights = {
+  yield_2y: 0.45, sharp_2y: 0.25, amc_sector_y: 0.30,
 };
 
 export interface ScoredFund extends Fund {
-  score_aum: number | null;
   score_yield_2y: number | null;
   score_sharp_2y: number | null;
   score_amc_sector_y: number | null;

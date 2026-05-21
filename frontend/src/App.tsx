@@ -102,7 +102,7 @@ export default function App() {
             setWeights(DEFAULT_WEIGHTS);
             setFilter(DEFAULT_FILTER);
           }}
-          title="기본 설정으로 초기화 (한투★: 2Y / sharp≥1.3 / family≥300억 / 10·40·20·30)"
+          title="기본 설정으로 초기화 (한투★: 2Y / sharp≥1.3 / family NAV≥300억 / 수익45·샤프25·운용사30)"
           style={{
             marginLeft: "auto",
             padding: "5px 12px", fontSize: 12,

@@ -11,7 +11,7 @@ interface Props {
 const HANTO = "한국투자신탁운용";
 
 export function AMCSidebar({ funds, sector, byAmcOverall, aumByAmcOverall }: Props) {
-  // 현재 sector/TDF + 표시 펀드 안의 unique amc 추출 (sector 필터만 적용, 점수/AUM은 항상 overall)
+  // 현재 sector/TDF + 표시 펀드 안의 unique amc 추출 (sector 필터만 적용, 점수/NAV은 항상 overall)
   const amcSet = new Set<string>();
   const cntMap = new Map<string, number>();
   funds.forEach((f) => {
@@ -43,7 +43,7 @@ export function AMCSidebar({ funds, sector, byAmcOverall, aumByAmcOverall }: Pro
           전체 통합 ranking{sector !== "전체" && sector !== "TDF" ? ` (${sector} 보유 운용사)` : sector === "TDF" ? " (TDF 보유 운용사)" : ""}
         </div>
         <div style={{ fontSize: 11, color: "#888" }}>
-          필터 통과 펀드들의 운용사별 family AEK 합 기준
+          국내·해외 주식/채권 4개 sector 필터 통과 펀드의 운용사별 family NAV 합 기준
         </div>
       </div>
 

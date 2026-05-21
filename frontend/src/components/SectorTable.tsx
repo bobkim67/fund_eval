@@ -110,11 +110,10 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
                 <Th>운용사</Th>
                 <Th>라인업</Th>
                 <Th left>펀드명</Th>
-                <Th right>클래스AUM</Th>
-                <Th right>패밀리AUM</Th>
+                <Th right>클래스NAV</Th>
+                <Th right>패밀리NAV</Th>
                 <Th right>{periodLabel}%</Th>
                 <Th right>샤프({periodLabel})</Th>
-                <Th right title="패밀리AUM 기반">패밀리AUM점수</Th>
                 <Th right>수익점수</Th>
                 <Th right>샤프점수</Th>
                 <Th right>운용사점수</Th>
@@ -125,7 +124,7 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
               {grouping
                 ? groups.flatMap((g) => [
                     <tr key={`g-${g.cd}`} style={{ background: "#eef3f9", borderTop: "2px solid #c4d4e6", borderBottom: "1px solid #c4d4e6" }}>
-                      <td colSpan={13} style={{ padding: "6px 10px", fontSize: 12, fontWeight: 600, color: "#0d47a1" }}>
+                      <td colSpan={12} style={{ padding: "6px 10px", fontSize: 12, fontWeight: 600, color: "#0d47a1" }}>
                         {g.nm} <span style={{ color: "#888", fontWeight: 400, fontSize: 11 }}>({g.cd}, {g.funds.length}개)</span>
                       </td>
                     </tr>,
@@ -157,11 +156,10 @@ function renderRow(f: ScoredFund, i: number, sector: string, vintage: string, fi
       <Td>{f.amc_nm}</Td>
       <Td>{f.in_kis_lineup === "Y" ? "KIS" : "-"}</Td>
       <Td left title={f.fund_nm || ""}>{(f.fund_nm || "").slice(0, 45)}</Td>
-      <Td right>{formatAUM(f.aum)}</Td>
-      <Td right>{formatAUM(f.fam_aek)}</Td>
+      <Td right>{formatAUM(f.nav)}</Td>
+      <Td right>{formatAUM(f.fam_nav)}</Td>
       <Td right>{formatPct(getYield(f, filter.period))}</Td>
       <Td right>{formatNum(getSharp(f, filter.period))}</Td>
-      <Td right>{formatNum(f.score_aum, 1)}</Td>
       <Td right>{formatNum(f.score_yield_2y, 1)}</Td>
       <Td right>{formatNum(f.score_sharp_2y, 1)}</Td>
       <Td right>{formatNum(f.score_amc_sector_y, 1)}</Td>
