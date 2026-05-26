@@ -51,7 +51,18 @@ export function AdminTab() {
       const j: BuildResp = await r.json();
       setResult(j);
     } catch (e) {
-      setError(String(e));
+      const msg = String(e);
+      if (msg.includes("Failed to fetch")) {
+        setError(
+          `FastAPI 서버 응답 없음 (port 8001).\n\n` +
+          `해결책 — 다음 중 하나 실행:\n` +
+          `  1) cmd에서: cd web && _run_api.bat\n` +
+          `  2) 또는 vite dev 재시작 (vite.config의 plugin이 자동 spawn)\n` +
+          `  3) 또는 cmd: python -m uvicorn api.main:app --reload --port 8001`
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setRunning(false);
     }
