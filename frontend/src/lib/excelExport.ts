@@ -1,5 +1,5 @@
-import type { ScoredFund, Period } from "../types";
-import { getSharp, getYield } from "./scoring";
+import type { ScoredFund, Period, Weights } from "../types";
+import { getSharp, getYield, rankScore } from "./scoring";
 
 const HANTO = "한국투자신탁운용";
 const BODY_SIZE = 10;
@@ -109,6 +109,7 @@ export async function exportFundsToExcel(
   period: Period,
   groupBySub: boolean,
   asOfDate: string,
+  weights: Weights,
 ) {
   const ExcelJS = (await import("exceljs")) as unknown as ExcelJSModule;
   const wb = new ExcelJS.Workbook();
@@ -154,7 +155,18 @@ export async function exportFundsToExcel(
       });
       const sortedGroups = Array.from(groupMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
-      for (const [cd, items] of sortedGroups) {
+      for (const [cd, itemsRaw] of sortedGroups) {
+        // 그룹 안에서만 yield/sharp ranking 재계산. 운용사 점수는 sector 기준 유지.
+        const yldSc = rankScore(itemsRaw.map((f) => getYield(f, period)));
+        const shpSc = rankScore(itemsRaw.map((f) => getSharp(f, period)));
+        const items = itemsRaw.map((f, i) => {
+          const sy = yldSc[i], ss = shpSc[i], sa = f.score_amc_sector_y;
+          const ok = sy !== null && ss !== null && sa !== null;
+          const total = ok
+            ? weights.yield_2y * (sy as number) + weights.sharp_2y * (ss as number) + weights.amc_sector_y * (sa as number)
+            : null;
+          return { ...f, score_yield_2y: sy, score_sharp_2y: ss, total_score: total };
+        });
         items.sort((a, b) => (b.total_score ?? 0) - (a.total_score ?? 0));
         const nm = items[0]?.subclass_nm || "미분류";
         const gRow = ws.addRow([`▶ ${nm} (${cd}, ${items.length}개)`]);

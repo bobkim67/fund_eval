@@ -112,8 +112,8 @@ export default function App() {
           ↻ 초기화
         </button>
         <button
-          onClick={() => exportFundsToExcel(scored, snapshot.sector_groups, filter.period, groupBySub, activeDate)}
-          title="현재 점수/필터 상태 + 소분류 그룹핑 토글에 따라 탭별 시트로 내려받기 (펀드코드 포함)"
+          onClick={() => exportFundsToExcel(scored, snapshot.sector_groups, filter.period, groupBySub, activeDate, weights)}
+          title="현재 점수/필터 + 그룹핑 (소분류 그룹핑 ON 시 그룹내 점수 재계산) 반영하여 탭별 시트로 내려받기 (펀드코드 포함)"
           style={{
             padding: "5px 12px", fontSize: 12, fontWeight: 600,
             border: "1px solid #107c41", background: "#e8f5e9",
@@ -163,7 +163,14 @@ export default function App() {
               );
             })}
           </div>
-          <SectorTable funds={scored} sector={activeSector} filter={filter} groupBySub={groupBySub} setGroupBySub={setGroupBySub} />
+          <SectorTable
+            funds={scored}
+            sector={activeSector}
+            filter={filter}
+            weights={weights}
+            groupBySub={groupBySub}
+            setGroupBySub={setGroupBySub}
+          />
         </div>
 
         <AMCSidebar

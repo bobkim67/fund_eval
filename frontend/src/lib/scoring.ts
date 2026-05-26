@@ -33,7 +33,7 @@ export function passUserFilter(f: Fund, fs: FilterState): boolean {
 }
 
 // 1~100 linear ranking score (큰 값이 100점)
-function rankScore(values: (number | null)[]): (number | null)[] {
+export function rankScore(values: (number | null)[]): (number | null)[] {
   const valid = values
     .map((v, i) => ({ v, i }))
     .filter((x) => x.v !== null && !isNaN(x.v as number)) as { v: number; i: number }[];

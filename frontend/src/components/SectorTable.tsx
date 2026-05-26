@@ -1,18 +1,19 @@
 import { useState } from "react";
-import type { ScoredFund, FilterState } from "../types";
-import { formatAUM, formatPct, formatNum, getSharp, getYield } from "../lib/scoring";
+import type { ScoredFund, FilterState, Weights } from "../types";
+import { formatAUM, formatPct, formatNum, getSharp, getYield, rankScore } from "../lib/scoring";
 
 interface Props {
   funds: ScoredFund[];
   sector: string;
   filter: FilterState;
+  weights: Weights;
   groupBySub: boolean;
   setGroupBySub: (v: boolean) => void;
 }
 
 const HANTO = "한국투자신탁운용";
 
-export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }: Props) {
+export function SectorTable({ funds, sector, filter, weights, groupBySub, setGroupBySub }: Props) {
   const periodLabel = filter.period === "1Y" ? "1Y" : filter.period === "3Y" ? "3Y" : "2Y";
   const [vintage, setVintage] = useState<string>("전체");
   const [topN, setTopN] = useState<number>(5);
@@ -40,8 +41,8 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
   // 그룹핑 대상: 전체/TDF 아닌 sector + 토글 ON
   const grouping = groupBySub && sector !== "전체" && sector !== "TDF";
 
-  // 그룹별 (subclass_cd 오름차순, 그룹 내 total_score desc — 그룹별 1,2,3 순위 재시작)
-  // grouping=true 시 사용. flat list = filtered.
+  // 그룹별 (subclass_cd 오름차순, 그룹 내 yield/sharp ranking 재계산 → total_score 갱신).
+  // 운용사 점수는 sector 차원의 ranking 이라 그대로 유지.
   type Group = { cd: string; nm: string; funds: ScoredFund[] };
   const groups: Group[] = (() => {
     if (!grouping) return [];
@@ -52,6 +53,19 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
       let g = m.get(cd);
       if (!g) { g = { cd, nm, funds: [] }; m.set(cd, g); }
       g.funds.push(f);
+    }
+    for (const g of m.values()) {
+      const yldSc = rankScore(g.funds.map((f) => getYield(f, filter.period)));
+      const shpSc = rankScore(g.funds.map((f) => getSharp(f, filter.period)));
+      g.funds = g.funds.map((f, i) => {
+        const sy = yldSc[i], ss = shpSc[i], sa = f.score_amc_sector_y;
+        const ok = sy !== null && ss !== null && sa !== null;
+        const total = ok
+          ? weights.yield_2y * (sy as number) + weights.sharp_2y * (ss as number) + weights.amc_sector_y * (sa as number)
+          : null;
+        return { ...f, score_yield_2y: sy, score_sharp_2y: ss, total_score: total };
+      });
+      g.funds.sort((a, b) => (b.total_score ?? -Infinity) - (a.total_score ?? -Infinity));
     }
     return Array.from(m.values()).sort((a, b) => a.cd.localeCompare(b.cd));
   })();
@@ -102,7 +116,10 @@ export function SectorTable({ funds, sector, filter, groupBySub, setGroupBySub }
                 style={{ width: 44, padding: "1px 4px", fontSize: 11, border: "1px solid #ccc", borderRadius: 3 }}
               />
             </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", color: "#555" }}>
+            <label
+              title="소분류 그룹핑 ON 시 yield/sharp 점수는 그룹 안에서만 ranking 재계산 (운용사 점수는 sector 기준 유지). 동질 카테고리 내 상대평가."
+              style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", color: "#555" }}
+            >
               <input
                 type="checkbox"
                 checked={groupBySub}
