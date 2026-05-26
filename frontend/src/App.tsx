@@ -6,7 +6,10 @@ import { WeightsSlider } from "./components/WeightsSlider";
 import { FilterPanel } from "./components/FilterPanel";
 import { SectorTable } from "./components/SectorTable";
 import { AMCSidebar } from "./components/AMCSidebar";
+import { AdminTab } from "./components/AdminTab";
 import { exportFundsToExcel } from "./lib/excelExport";
+
+const IS_DEV = import.meta.env.DEV;
 
 interface DateIndex {
   dates: { as_of: string; label: string }[];
@@ -74,7 +77,8 @@ export default function App() {
   );
   if (!snapshot) return <div style={{ padding: 20 }}>Loading ...</div>;
 
-  const tabs = ["전체", ...snapshot.sector_groups, "TDF"];
+  const tabs = ["전체", ...snapshot.sector_groups, "TDF", ...(IS_DEV ? ["Admin"] : [])];
+  const isAdminTab = activeSector === "Admin";
 
   return (
     <div style={{
@@ -121,6 +125,20 @@ export default function App() {
           }}>
           📥 Excel 내려받기
         </button>
+        {!IS_DEV && (
+          <a
+            href="http://localhost:5174/"
+            target="_blank"
+            rel="noreferrer"
+            title="로컬 dev 서버 (port 5174) 의 Admin 탭으로 이동. 로컬 dev 서버 + FastAPI 실행 필요."
+            style={{
+              padding: "5px 12px", fontSize: 12, fontWeight: 600,
+              border: "1px solid #d84315", background: "#fff3e0",
+              color: "#d84315", borderRadius: 4, textDecoration: "none",
+            }}>
+            🔧 로컬 Admin
+          </a>
+        )}
       </header>
 
       {/* 상단: 가중치 + 상품필터 */}
@@ -133,14 +151,29 @@ export default function App() {
         <FilterPanel filter={filter} onChange={setFilter} totalCount={snapshot.funds.length} passedCount={filteredFunds.length} />
       </div>
 
-      {/* 메인: 좌(테이블) + 우(운용사 사이드바) — 남은 공간 다 차지 */}
-      <div style={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "1fr 320px", gap: 8 }}>
+      {/* 메인: 좌(테이블) + 우(운용사 사이드바) — Admin 탭에서는 사이드바 숨김 */}
+      <div style={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: isAdminTab ? "1fr" : "1fr 320px", gap: 8 }}>
         <div style={{
           background: "#fff", borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
           overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0,
         }}>
           <div style={{ display: "flex", borderBottom: "1px solid #e0e0e0", overflowX: "auto", flexShrink: 0 }}>
             {tabs.map((sg) => {
+              if (sg === "Admin") {
+                const isActive = activeSector === sg;
+                return (
+                  <button key={sg} onClick={() => setActiveSector(sg)}
+                    style={{
+                      padding: "10px 16px", border: "none",
+                      background: isActive ? "#fff3e0" : "transparent",
+                      borderBottom: isActive ? "2px solid #d84315" : "2px solid transparent",
+                      color: "#d84315", fontSize: 13, fontWeight: isActive ? 700 : 600,
+                      cursor: "pointer", whiteSpace: "nowrap", marginLeft: "auto",
+                    }}>
+                    🔧 Admin
+                  </button>
+                );
+              }
               const matchSec = (f: ScoredFund) =>
                 sg === "전체" ? true :
                 sg === "TDF" ? f.is_tdf :
@@ -163,22 +196,26 @@ export default function App() {
               );
             })}
           </div>
-          <SectorTable
-            funds={scored}
-            sector={activeSector}
-            filter={filter}
-            weights={weights}
-            groupBySub={groupBySub}
-            setGroupBySub={setGroupBySub}
-          />
+          {isAdminTab ? (
+            <AdminTab />
+          ) : (
+            <SectorTable
+              funds={scored}
+              sector={activeSector}
+              filter={filter}
+              weights={weights}
+              groupBySub={groupBySub}
+              setGroupBySub={setGroupBySub}
+            />
+          )}
         </div>
 
-        <AMCSidebar
+        {!isAdminTab && <AMCSidebar
           funds={scored}
           sector={activeSector}
           byAmcOverall={amcMaps.byAmcOverall}
           aumByAmcOverall={amcMaps.aumByAmcOverall}
-        />
+        />}
       </div>
     </div>
   );
