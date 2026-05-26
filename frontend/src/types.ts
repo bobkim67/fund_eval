@@ -75,17 +75,17 @@ export interface FilterState {
   lineup: "all" | "kis" | "kis_kim";             // 전체 / KIS 라인업 / KIS + 한투(KIM)
 }
 
-// 기본 = 한투★ 셋팅 (2Y / sharp≥1.0 / family NAV≥300억 / 라인업 전체)
+// 기본 셋팅 (3Y / sharp≥1.0 / family NAV≥300억 / 라인업 전체)
 export const DEFAULT_FILTER: FilterState = {
-  period: "2Y",
+  period: "3Y",
   sharp_min: 1.0,
   fam_aek_min_oku: 300,
   lineup: "all",
 };
 
-// 기본 가중치 = 한투★ (수익 45 / 샤프 25 / 운용사 30) — NAV 슬롯 제거
+// 기본 가중치 (3년수익 50 / 3년샤프 25 / 운용사 25)
 export const DEFAULT_WEIGHTS: Weights = {
-  yield_2y: 0.45, sharp_2y: 0.25, amc_sector_y: 0.30,
+  yield_2y: 0.50, sharp_2y: 0.25, amc_sector_y: 0.25,
 };
 
 export interface ScoredFund extends Fund {
